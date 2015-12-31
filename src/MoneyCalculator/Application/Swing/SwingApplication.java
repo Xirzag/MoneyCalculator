@@ -9,14 +9,13 @@ import MoneyCalculator.View.Ui.ApplicationDialog;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SwingApplication extends JFrame implements ApplicationDialog {
 
 
-    private final CurrencySetLoader currencyLoader;
+    private CurrencySetLoader currencyLoader;
     private final Map<String, Command> commands = new HashMap<>();
     private SwingMoneyDisplay moneyDisplay;
     private SwingMoneyDialog moneyDialog;
@@ -28,9 +27,28 @@ public class SwingApplication extends JFrame implements ApplicationDialog {
 
     public SwingApplication() {
         super();
-        currencyLoader = new MockCurrencySetLoader();
+        if(!loadCurrencySet())
+            exitWithFailure("Error, couldn't connect to the database");
+
         createCommands();
         deployUi();
+    }
+
+    private void exitWithFailure(Object errorMessage) {
+        JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+        this.dispose();
+        System.exit(1);
+    }
+
+    private boolean loadCurrencySet() {
+        try {
+
+            //currencyLoader = new CurrencySetDatabaseLoader("none");
+            currencyLoader = new MockCurrencySetLoader();
+            return true;
+        }catch (Exception e){
+            return false;
+        }
     }
 
     private void createCommands() {
@@ -53,7 +71,6 @@ public class SwingApplication extends JFrame implements ApplicationDialog {
         addMoneyDialog();
         addCurrencyDialog();
         addMoneyDisplay();
-        addExchangeButton();
     }
 
     private void addMoneyDisplay() {
@@ -63,25 +80,27 @@ public class SwingApplication extends JFrame implements ApplicationDialog {
 
     private void addCurrencyDialog() {
         this.currencyDialog = new SwingCurrencyDialog(currencyLoader);
+        this.currencyDialog.setBorder(new EmptyBorder(new Insets(5, 5, 5, 5)));
+        selectSecondCurrencyInCurrencyDialog();
+        this.currencyDialog.addItemListener(e -> execute("exchange"));
+
         this.add(this.currencyDialog, BorderLayout.EAST);
+    }
+
+    private void selectSecondCurrencyInCurrencyDialog() {
+        if(this.currencyDialog.getItemCount() > 1)
+            this.currencyDialog.setSelectedIndex(1);
     }
 
     private void addMoneyDialog() {
         this.moneyDialog = new SwingMoneyDialog(currencyLoader);
+        this.moneyDialog.addChangeListener(e -> execute("exchange"));
+
         this.add(this.moneyDialog, BorderLayout.NORTH);
     }
 
-    private void addExchangeButton() {
-        JButton button = new JButton("Calculate");
-        button.addActionListener(execute("exchange"));
-        JPanel panel = new JPanel();
-        panel.add(button);
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        this.add(panel, BorderLayout.SOUTH);
-    }
-
-    private ActionListener execute(String command) {
-        return e -> commands.get(command).execute();
+    private void execute(String command) {
+        commands.get(command).execute();
     }
 
 

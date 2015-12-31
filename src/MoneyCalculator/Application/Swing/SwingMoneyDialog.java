@@ -7,14 +7,16 @@ import MoneyCalculator.View.Ui.MoneyDialog;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.NumberFormat;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 public class SwingMoneyDialog extends JPanel implements MoneyDialog {
 
 
     private SwingCurrencyDialog currencyDialog;
-    //private JFormattedTextField textField;
     private JTextField textField;
+    private ActionListener onChangeEvent;
 
     public SwingMoneyDialog(CurrencySetLoader currencyLoader) {
         deployUi(currencyLoader);
@@ -27,16 +29,34 @@ public class SwingMoneyDialog extends JPanel implements MoneyDialog {
 
     private void AddCurrencyMenu(CurrencySetLoader currencyLoader) {
         this.currencyDialog = new SwingCurrencyDialog(currencyLoader);
+        this.currencyDialog.addItemListener( e -> onChangeEvent.actionPerformed(null));
         this.add(currencyDialog,  BorderLayout.EAST);
     }
 
     private void addTextField() {
-        NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
-        //this.textField = new JFormattedTextField(moneyFormat);
         this.textField = new JTextField();
         this.textField.setColumns(10);
-        this.textField.setText("0");
-        this.add(textField, BorderLayout.CENTER);
+        this.textField.setText("0.00");
+        this.textField.addKeyListener(createChangeTextFieldListener());
+        this.add(textField);
+    }
+
+    private KeyListener createChangeTextFieldListener() {
+        return new KeyListener() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                onChangeEvent.actionPerformed(null);
+            }
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+            }
+
+        };
     }
 
     @Override
@@ -49,7 +69,14 @@ public class SwingMoneyDialog extends JPanel implements MoneyDialog {
     }
 
     private double getMoneyAmount() {
-        String moneyAmount = this.textField.getText();
-        return Double.parseDouble(moneyAmount);
+        try{
+            return Double.parseDouble(this.textField.getText());
+        }catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public void addChangeListener(ActionListener event) {
+        this.onChangeEvent = event;
     }
 }

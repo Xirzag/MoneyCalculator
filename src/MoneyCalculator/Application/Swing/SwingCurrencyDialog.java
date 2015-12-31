@@ -5,13 +5,10 @@ import MoneyCalculator.View.Persistence.CurrencySetLoader;
 import MoneyCalculator.View.Ui.CurrencyDialog;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
 
 public class SwingCurrencyDialog extends JComboBox implements CurrencyDialog {
 
     public SwingCurrencyDialog(CurrencySetLoader currencyLoader) {
-        this.setBorder(new EmptyBorder(new Insets(10,10,10,10)));
         getAllCurrenciesFrom(currencyLoader);
 
     }

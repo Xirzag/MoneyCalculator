@@ -10,7 +10,7 @@ public class MockExchangeRateReader implements ExchangeRateReader {
 
     @Override
     public ExchangeRate get(Date date, Currency from, Currency to) {
-        return new ExchangeRate(from, to, 2.7);
+        return new ExchangeRate(from, to, 2.0);
     }
     
 }
