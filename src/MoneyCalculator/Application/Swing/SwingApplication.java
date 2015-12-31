@@ -1,9 +1,11 @@
 package MoneyCalculator.Application.Swing;
 
-import MoneyCalculator.Application.Mock.MockCurrencySetLoader;
+import MoneyCalculator.Application.SqliteDatabase.CurrencySetDatabaseReader;
+import MoneyCalculator.Application.SqliteDatabase.ExchangeRateDatabaseReader;
+import MoneyCalculator.Model.PersistenceReaderError;
 import MoneyCalculator.Control.Command;
 import MoneyCalculator.Control.ExchangeCommand;
-import MoneyCalculator.View.Persistence.CurrencySetLoader;
+import MoneyCalculator.View.Persistence.CurrencySetReader;
 import MoneyCalculator.View.Ui.ApplicationDialog;
 
 import javax.swing.*;
@@ -15,11 +17,12 @@ import java.util.Map;
 public class SwingApplication extends JFrame implements ApplicationDialog {
 
 
-    private CurrencySetLoader currencyLoader;
+    private CurrencySetReader currencyReader;
     private final Map<String, Command> commands = new HashMap<>();
     private SwingMoneyDisplay moneyDisplay;
     private SwingMoneyDialog moneyDialog;
     private SwingCurrencyDialog currencyDialog;
+    private ExchangeRateDatabaseReader exchangeRateReader;
 
     public static void main(String[] args) {
         new SwingApplication();
@@ -27,9 +30,7 @@ public class SwingApplication extends JFrame implements ApplicationDialog {
 
     public SwingApplication() {
         super();
-        if(!loadCurrencySet())
-            exitWithFailure("Error, couldn't connect to the database");
-
+        loadPersistence();
         createCommands();
         deployUi();
     }
@@ -40,24 +41,17 @@ public class SwingApplication extends JFrame implements ApplicationDialog {
         System.exit(1);
     }
 
-    private boolean loadCurrencySet() {
-        try {
-
-            //currencyLoader = new CurrencySetDatabaseLoader("none");
-            currencyLoader = new MockCurrencySetLoader();
-            return true;
-        }catch (Exception e){
-            return false;
-        }
+    private void loadPersistence() {
+        currencyReader = new CurrencySetDatabaseReader("resources/exchange.db");
+        exchangeRateReader = new ExchangeRateDatabaseReader("resources/exchange.db");
     }
 
     private void createCommands() {
-        commands.put("exchange", new ExchangeCommand(this));
+        commands.put("exchange", new ExchangeCommand(this, exchangeRateReader));
     }
 
     private void deployUi() {
         this.setTitle("Money Calculator");
-        this.setSize(400, 500);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
         this.createInterface();
@@ -68,9 +62,13 @@ public class SwingApplication extends JFrame implements ApplicationDialog {
     }
 
     private void createInterface() {
-        addMoneyDialog();
-        addCurrencyDialog();
-        addMoneyDisplay();
+        try {
+            addMoneyDialog();
+            addCurrencyDialog();
+            addMoneyDisplay();
+        } catch (PersistenceReaderError readerError) {
+            exitWithFailure(readerError.getMessage());
+        }
     }
 
     private void addMoneyDisplay() {
@@ -78,8 +76,8 @@ public class SwingApplication extends JFrame implements ApplicationDialog {
         this.add(this.moneyDisplay, BorderLayout.CENTER);
     }
 
-    private void addCurrencyDialog() {
-        this.currencyDialog = new SwingCurrencyDialog(currencyLoader);
+    private void addCurrencyDialog() throws PersistenceReaderError {
+        this.currencyDialog = new SwingCurrencyDialog(currencyReader);
         this.currencyDialog.setBorder(new EmptyBorder(new Insets(5, 5, 5, 5)));
         selectSecondCurrencyInCurrencyDialog();
         this.currencyDialog.addItemListener(e -> execute("exchange"));
@@ -88,12 +86,12 @@ public class SwingApplication extends JFrame implements ApplicationDialog {
     }
 
     private void selectSecondCurrencyInCurrencyDialog() {
-        if(this.currencyDialog.getItemCount() > 1)
+        if (this.currencyDialog.getItemCount() > 1)
             this.currencyDialog.setSelectedIndex(1);
     }
 
-    private void addMoneyDialog() {
-        this.moneyDialog = new SwingMoneyDialog(currencyLoader);
+    private void addMoneyDialog() throws PersistenceReaderError {
+        this.moneyDialog = new SwingMoneyDialog(currencyReader);
         this.moneyDialog.addChangeListener(e -> execute("exchange"));
 
         this.add(this.moneyDialog, BorderLayout.NORTH);

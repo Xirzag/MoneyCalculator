@@ -1,14 +1,15 @@
 package MoneyCalculator.Application.Swing;
 
+import MoneyCalculator.Model.PersistenceReaderError;
 import MoneyCalculator.Model.Currency;
-import MoneyCalculator.View.Persistence.CurrencySetLoader;
+import MoneyCalculator.View.Persistence.CurrencySetReader;
 import MoneyCalculator.View.Ui.CurrencyDialog;
 
 import javax.swing.*;
 
 public class SwingCurrencyDialog extends JComboBox implements CurrencyDialog {
 
-    public SwingCurrencyDialog(CurrencySetLoader currencyLoader) {
+    public SwingCurrencyDialog(CurrencySetReader currencyLoader) throws PersistenceReaderError {
         getAllCurrenciesFrom(currencyLoader);
 
     }
@@ -31,8 +32,8 @@ public class SwingCurrencyDialog extends JComboBox implements CurrencyDialog {
         }
     }
 
-    private void getAllCurrenciesFrom(CurrencySetLoader currencyLoader) {
-        currencyLoader.load().stream().forEach(
+    private void getAllCurrenciesFrom(CurrencySetReader currencyLoader) throws PersistenceReaderError {
+        currencyLoader.read().stream().forEach(
                 currency -> this.addItem(new CurrencyItem(currency))
         );
     }

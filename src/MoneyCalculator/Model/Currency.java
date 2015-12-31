@@ -25,7 +25,7 @@ public class Currency {
 
     @Override
     public boolean equals(Object obj) {
-        return (obj instanceof Currency)? ((Currency) obj).name == name : false;
+        return (obj instanceof Currency) ? ((Currency) obj).name == name : false;
     }
 
     @Override

@@ -1,8 +1,9 @@
 package MoneyCalculator.Application.Swing;
 
+import MoneyCalculator.Model.PersistenceReaderError;
 import MoneyCalculator.Model.Currency;
 import MoneyCalculator.Model.Money;
-import MoneyCalculator.View.Persistence.CurrencySetLoader;
+import MoneyCalculator.View.Persistence.CurrencySetReader;
 import MoneyCalculator.View.Ui.MoneyDialog;
 
 import javax.swing.*;
@@ -18,19 +19,19 @@ public class SwingMoneyDialog extends JPanel implements MoneyDialog {
     private JTextField textField;
     private ActionListener onChangeEvent;
 
-    public SwingMoneyDialog(CurrencySetLoader currencyLoader) {
+    public SwingMoneyDialog(CurrencySetReader currencyLoader) throws PersistenceReaderError {
         deployUi(currencyLoader);
     }
 
-    private void deployUi(CurrencySetLoader currencyLoader) {
+    private void deployUi(CurrencySetReader currencyLoader) throws PersistenceReaderError {
         addTextField();
         AddCurrencyMenu(currencyLoader);
     }
 
-    private void AddCurrencyMenu(CurrencySetLoader currencyLoader) {
+    private void AddCurrencyMenu(CurrencySetReader currencyLoader) throws PersistenceReaderError {
         this.currencyDialog = new SwingCurrencyDialog(currencyLoader);
-        this.currencyDialog.addItemListener( e -> onChangeEvent.actionPerformed(null));
-        this.add(currencyDialog,  BorderLayout.EAST);
+        this.currencyDialog.addItemListener(e -> onChangeEvent.actionPerformed(null));
+        this.add(currencyDialog, BorderLayout.EAST);
     }
 
     private void addTextField() {
@@ -69,9 +70,9 @@ public class SwingMoneyDialog extends JPanel implements MoneyDialog {
     }
 
     private double getMoneyAmount() {
-        try{
+        try {
             return Double.parseDouble(this.textField.getText());
-        }catch (Exception e) {
+        } catch (Exception e) {
             return 0;
         }
     }

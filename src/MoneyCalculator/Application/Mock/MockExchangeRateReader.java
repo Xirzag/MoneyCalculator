@@ -12,5 +12,5 @@ public class MockExchangeRateReader implements ExchangeRateReader {
     public ExchangeRate get(Date date, Currency from, Currency to) {
         return new ExchangeRate(from, to, 2.0);
     }
-    
+
 }

@@ -7,7 +7,7 @@ public class MockCurrencyDialog implements CurrencyDialog {
 
     @Override
     public Currency get() {
-        return new Currency("EUR","Euro","€");
+        return new Currency("EUR", "Euro", "€");
     }
-    
+
 }

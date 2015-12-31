@@ -8,8 +8,8 @@ public class MockMoneyDialog implements MoneyDialog {
 
     @Override
     public Money get() {
-        return new Money(300, new Currency("USD","Dólar","$"));
+        return new Money(300, new Currency("USD", "Dólar", "$"));
     }
 
-    
+
 }

@@ -9,5 +9,5 @@ public class MockMoneyDisplay implements MoneyDisplay {
     public void show(Money money) {
         System.out.println(money.getAmount() + " " + money.getCurrency().getSymbol());
     }
-    
+
 }
